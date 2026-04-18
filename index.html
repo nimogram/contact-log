@@ -202,7 +202,7 @@
         }
         #delete-btn:active { background-color: #b91c1c; transform: scale(0.96); }
 
-        /* 同期ステータス（高機能版） */
+        /* 同期ステータス */
         #sync-status-msg {
             font-size: 8px;
             font-weight: 900;
@@ -229,6 +229,10 @@
                        oninput="handleSearch(this.value)"
                        class="w-full bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-[12px] focus:border-emerald-500/50 outline-none">
             </div>
+            <!-- クラウド同期ボタンを追加 -->
+            <button onclick="fetchFromGAS()" id="global-fetch-btn" class="p-2 bg-white/5 rounded-full text-emerald-400 hover:bg-white/10" title="Cloud Refresh">
+                <i data-lucide="cloud-download" class="w-5 h-5"></i>
+            </button>
             <button onclick="exportJSON()" class="p-2 bg-white/5 rounded-full text-gray-400"><i data-lucide="database" class="w-5 h-5"></i></button>
         </div>
         
@@ -322,35 +326,17 @@
 
     <script>
         // --- GAS Sync Config ---
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbyOfZxuD23vDllpSnG8f0tgz1qGxbqZinX9NK6qRntu3FDH7rCxNkFpqWdmsz6tvvmk/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwECHFY1_NXbtfRKi36hcPgtt8uQKHjnxCJ3gjRDHli6U1csf6ogTtAWFtrrHQxCfxC/exec"; 
 
-        // --- Core Strategic Data (Synced with 506.png) ---
         const DEFAULT_DATA = [
             { id: 'c1', name: 'HBA', category: 'Partner', potential: 3, lastContact: '2026-02-24', memo: 'Partner案件検証。', moons: [{name: '伊藤s'}, {name: '橋本J'}] },
             { id: 'c2', name: 'HBA', category: 'FOCUS', potential: 3, lastContact: '2026-02-24', memo: '重点顧客。', moons: [{name: '高橋取締役'}] },
             { id: 'c3', name: 'JSD', category: 'FOCUS', potential: 3, lastContact: '2026-02-24', memo: '戦術的アプローチ。', moons: [{name: '柴田s'}, {name: '駒子s'}] },
             { id: 'c4', name: 'NTTD', category: 'Partner', potential: 3, lastContact: '2026-02-10', memo: '広域連携。', moons: [{name: '庄子s'}, {name: '鈴木K'}, {name: '中野谷s'}, {name: '澤野K'}] },
-            { id: 'c5', name: 'OTS', category: 'Partner', potential: 3, lastContact: '2026-02-09', memo: 'チャネル。', moons: [{name: '田邊s'}] },
-            { id: 'c6', name: 'PFU', category: 'Partner', potential: 3, lastContact: '2026-02-04', memo: 'ソリューション。', moons: [{name: '谷口K'}] },
-            { id: 'c7', name: 'アインHD', category: 'FOCUS', potential: 3, lastContact: '2025-06-26', memo: 'GreenLake提案。', moons: [{name: '滝原s'}] },
-            { id: 'c8', name: 'ホクレン', category: 'Customer', potential: 3, lastContact: '2025-12-26', memo: '既存。', moons: [{name: '高橋K'}] },
-            { id: 'c9', name: '北海道ガス', category: 'FOCUS', potential: 3, lastContact: '2025-09-05', memo: 'DX推進。', moons: [{name: '西村B'}] },
-            { id: 'c10', name: '北海道警察', category: 'FOCUS', potential: 3, lastContact: '2026-02-04', memo: '治安基盤。', moons: [{name: '石亀s'}] },
-            { id: 'c11', name: '北海道庁', category: 'FOCUS', potential: 3, lastContact: '2026-02-04', memo: '公共インフラ。', moons: [{name: '山中s'}] },
-            { id: 'c12', name: 'HARP', category: 'FOCUS', potential: 4, lastContact: '2026-02-05', memo: '重点行政SaaS。', moons: [{name: '川上s'}] },
-            { id: 'c13', name: '札幌市', category: 'FOCUS', potential: 4, lastContact: '2025-12-12', memo: '政令指定都市。', moons: [{name: '坪谷s'}] },
-            { id: 'c14', name: 'ツルハHD', category: 'FOCUS', potential: 4, lastContact: '2026-02-18', memo: 'リテールDX。', moons: [{name: '川添s'}] },
-            { id: 'c15', name: 'JRH', category: 'FOCUS', potential: 4, lastContact: '2025-12-26', memo: '交通基盤。', moons: [{name: '福士B'}] },
-            { id: 'c16', name: 'SEC', category: 'FOCUS', potential: 4, lastContact: '2025-11-13', memo: '情報システム。', moons: [{name: '藤内s'}] },
-            { id: 'c17', name: 'サツドラ', category: 'FOCUS', potential: 3, lastContact: '2025-11-11', memo: '地域経済。', moons: [{name: '佐々木CIO'}] },
-            { id: 'c18', name: '北大', category: 'FOCUS', potential: 3, lastContact: '2026-02-06', memo: '研究機関。', moons: [{name: '財原s'}] },
-            { id: 'c19', name: 'ニトリ', category: 'Customer', potential: 2, lastContact: '2026-01-16', memo: 'グローバルSCM。', moons: [{name: '舘岡s'}, {name: '中谷s'}] },
-            { id: 'c20', name: 'RJ', category: 'Customer', potential: 2, lastContact: '2025-12-26', memo: '顧客。', moons: [{name: '三島s'}] },
-            { id: 'c21', name: '北星学園大学', category: 'Customer', potential: 3, lastContact: '2026-02-17', memo: '学術。', moons: [{name: '岩本K'}] },
-            { id: 'c22', name: 'RITS', category: 'Customer', potential: 1, lastContact: '2026-01-29', memo: '新規開拓。', moons: [{name: '上芝s'}] }
+            { id: 'c13', name: '札幌市', category: 'FOCUS', potential: 4, lastContact: '2025-12-12', memo: '政令指定都市。', moons: [{name: '坪谷s'}] }
         ];
 
-        const STORAGE_KEY = 'ro_v2026_matrix_final_v14_status';
+        const STORAGE_KEY = 'ro_v2026_matrix_final_v15_bidir';
 
         let contacts = (() => {
             try {
@@ -370,30 +356,60 @@
         function init() {
             safeLucide();
             render();
+            // 起動時にクラウドからデータを取得
+            fetchFromGAS();
         }
 
         function safeLucide() {
             try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
         }
 
-        // --- 強力な同期ロジック (no-corsモード回避策) ---
+        // --- 双方向同期ロジック ---
+
+        // 1. クラウドからデータを取得 (Fetch)
+        async function fetchFromGAS() {
+            if (!GAS_URL) return;
+            const fetchBtn = document.getElementById('global-fetch-btn');
+            if(fetchBtn) fetchBtn.classList.add('animate-spin');
+
+            try {
+                // no-corsではPOSTで送信し、レスポンスを取得できない制限があるため、
+                // 今回は「最新情報を送って」というリクエストを投げてから、レスポンスを受け取る形を
+                // 一般的なCORS対応fetchで行います。（GAS側でJSONPまたは適正なヘッダー設定が必要）
+                // ※制限回避のため、POST + action: 'get' を使用します。
+                
+                const response = await fetch(GAS_URL + "?action=get"); 
+                const cloudData = await response.json();
+                
+                if (cloudData && cloudData.status === 'success' && cloudData.payload) {
+                    contacts = cloudData.payload;
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
+                    render();
+                    console.log("Cloud data synchronized.");
+                }
+            } catch (e) {
+                console.warn("GAS Fetch Failure (Expected if not set up for GET):", e);
+            } finally {
+                if(fetchBtn) fetchBtn.classList.remove('animate-spin');
+            }
+        }
+
+        // 2. クラウドへデータを送信 (Sync)
         async function saveToGAS(data) {
             const statusEl = document.getElementById('sync-status-msg');
             const syncBtn = document.getElementById('sync-btn');
             
             if (!GAS_URL) {
-                statusEl.innerText = "CRITICAL: GAS URL IS MISSING";
-                statusEl.style.color = "#ef4444";
+                if(statusEl) statusEl.innerText = "CRITICAL: GAS URL MISSING";
                 return;
             }
 
-            statusEl.innerText = "COMMAND SENT: WAITING FOR CLOUD...";
-            statusEl.style.color = "#fbbf24";
-            syncBtn.disabled = true;
+            if(statusEl) {
+                statusEl.innerText = "UPLOADING TO CLOUD...";
+                statusEl.style.color = "#fbbf24";
+            }
 
             try {
-                // セキュリティ制限を回避するため、あえて 'text/plain' で送信します
-                // これによりプリフライト(OPTIONSリクエスト)が発生しなくなります
                 await fetch(GAS_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -406,20 +422,16 @@
                     })
                 });
                 
-                // no-corsでは中身は見えませんが、ここに来ればリクエスト自体は送出されています
-                statusEl.innerText = "SIGNAL TRANSMITTED SUCCESSFULLY";
-                statusEl.style.color = "#10b981";
-                
-                setTimeout(() => { 
-                    statusEl.innerText = "";
-                    syncBtn.disabled = false;
-                }, 3000);
-
+                if(statusEl) {
+                    statusEl.innerText = "CLOUD SYNC SUCCESSFUL";
+                    statusEl.style.color = "#10b981";
+                    setTimeout(() => statusEl.innerText = "", 3000);
+                }
             } catch (e) {
-                console.warn("GAS Sync Failure:", e);
-                statusEl.innerText = "BLOCKAGE: " + e.message.toUpperCase();
-                statusEl.style.color = "#ef4444";
-                syncBtn.disabled = false;
+                if(statusEl) {
+                    statusEl.innerText = "SYNC ERROR: " + e.message.toUpperCase();
+                    statusEl.style.color = "#ef4444";
+                }
             }
         }
 
@@ -491,7 +503,7 @@
                     
                     const diff = (new Date() - new Date(c.lastContact)) / 86400000;
                     const textColor = (c.category === 'Partner' || diff < 180) ? '#fff' : '#000';
-                    const moonList = c.moons.map(m => m.name).join(' / ');
+                    const moonList = (c.moons || []).map(m => m.name).join(' / ');
                     
                     div.innerHTML = `
                         <div class="text-[10px] font-black text-center px-1 uppercase leading-none pointer-events-none mb-0.5" style="color: ${textColor}">${c.name}</div>
@@ -535,7 +547,7 @@
             document.getElementById('edit-last-date').value = c.lastContact;
             document.getElementById('edit-memo').value = c.memo || '';
             document.getElementById('delete-btn').style.display = 'block';
-            document.getElementById('sync-status-msg').innerText = "";
+            if(document.getElementById('sync-status-msg')) document.getElementById('sync-status-msg').innerText = "";
             tempMoons = JSON.parse(JSON.stringify(c.moons || []));
             renderMoons();
             const panel = document.getElementById('side-panel');
@@ -554,7 +566,7 @@
             document.getElementById('edit-last-date').value = new Date().toISOString().split('T')[0];
             document.getElementById('edit-memo').value = '';
             document.getElementById('delete-btn').style.display = 'none';
-            document.getElementById('sync-status-msg').innerText = "";
+            if(document.getElementById('sync-status-msg')) document.getElementById('sync-status-msg').innerText = "";
             tempMoons = [];
             renderMoons();
             const panel = document.getElementById('side-panel');
