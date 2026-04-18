@@ -34,6 +34,7 @@
             flex-direction: column;
         }
 
+        /* ヘッダー：背景透過ブラー */
         header {
             background-color: rgba(0, 0, 0, 0.85);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -41,6 +42,7 @@
             backdrop-filter: blur(8px);
         }
 
+        /* 四象限レイアウト：画面全体を4等分 */
         #matrix-container {
             flex: 1;
             display: grid;
@@ -74,6 +76,7 @@
             pointer-events: none;
         }
 
+        /* 均等タイル：会社名と担当者を配置 */
         .planet {
             position: relative;
             width: 100%;
@@ -95,19 +98,21 @@
             box-shadow: inset 0 0 25px rgba(16, 185, 129, 0.15), inset 0 0 0 1px rgba(16, 185, 129, 0.25);
         }
 
+        /* PARTNER：紫グラデーション */
         .planet-partner {
             background: linear-gradient(135deg, #6b21a8, #3b0764) !important;
             box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.2), inset 0 0 0 0.5px rgba(255,255,255,0.15) !important;
         }
 
+        /* 統合編集センター：超高透明度センターパネル */
         #side-panel {
             display: none; 
             position: fixed;
             inset: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.35); 
-            backdrop-filter: blur(6px); 
+            background: rgba(0, 0, 0, 0.35); /* 透明度：高い */
+            backdrop-filter: blur(6px); /* ぼかし：薄い */
             -webkit-backdrop-filter: blur(6px);
             z-index: 999999; 
             align-items: center;
@@ -124,7 +129,7 @@
         }
 
         .panel-content {
-            background: rgba(20, 20, 20, 0.45); 
+            background: rgba(20, 20, 20, 0.45); /* パネル自体の透明度：高い */
             width: 100%;
             max-width: 420px;
             border-radius: 28px;
@@ -167,6 +172,7 @@
             border-color: white !important;
         }
 
+        /* 輝くFABボタン */
         #fab-add {
             position: fixed;
             bottom: 25px;
@@ -201,6 +207,17 @@
             border: none;
         }
         #delete-btn:active { background-color: #b91c1c; transform: scale(0.96); }
+
+        /* 同期ステータス表示 */
+        #sync-status-msg {
+            font-size: 9px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: center;
+            margin-top: 4px;
+            transition: color 0.3s;
+        }
 
         ::-webkit-scrollbar { display: none; }
     </style>
@@ -245,6 +262,7 @@
         <i data-lucide="plus" class="w-10 h-10 text-white pointer-events-none"></i>
     </button>
 
+    <!-- 統合戦術センター -->
     <div id="side-panel" onclick="if(event.target === this) closePanel()">
         <div class="panel-content" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
@@ -260,7 +278,7 @@
                 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-[9px] text-gray-500 uppercase font-black mb-1 block tracking-widest">Potential</label>
+                        <label class="text-[9px] text-gray-500 uppercase font-black mb-1 block tracking-widest">Potential Rank</label>
                         <select id="edit-potential" class="w-full bg-white/10 border border-white/10 rounded-lg p-2 text-emerald-400 font-bold outline-none text-xs">
                             <option value="4">LV4 Strategic</option>
                             <option value="3">LV3 High</option>
@@ -280,25 +298,26 @@
                 </div>
 
                 <div>
-                    <label class="text-[9px] text-gray-500 uppercase font-black mb-1 block tracking-widest">Last Contact</label>
+                    <label class="text-[9px] text-gray-500 uppercase font-black mb-1 block tracking-widest">Last Contact Date</label>
                     <input type="date" id="edit-last-date" class="w-full bg-white/10 border border-white/10 rounded-lg p-2 text-white outline-none text-xs">
                 </div>
 
                 <div>
-                    <label class="text-[9px] text-gray-500 uppercase font-black mb-1 block tracking-widest">Intel Repo</label>
+                    <label class="text-[9px] text-gray-500 uppercase font-black mb-1 block tracking-widest">Intelligence Log (Repo)</label>
                     <textarea id="edit-memo" rows="3" class="w-full bg-white/10 border border-white/10 rounded-lg p-2 text-xs text-gray-300 outline-none leading-relaxed"></textarea>
                 </div>
 
                 <div class="pt-2 border-t border-white/5">
                     <div class="flex justify-between items-center mb-2">
-                        <label class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Stakeholders</label>
+                        <label class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Stakeholders (Moons)</label>
                         <button onclick="addMoon()" class="text-[9px] text-emerald-400 font-black">+ ADD</button>
                     </div>
                     <div id="moon-list" class="space-y-2"></div>
                 </div>
 
                 <div class="flex flex-col gap-2 pt-2">
-                    <button onclick="confirmSync()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-xl font-black text-white uppercase tracking-widest text-xs shadow-lg transition-all">Sync Strategy</button>
+                    <button id="sync-btn" onclick="confirmSync()" class="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-xl font-black text-white uppercase tracking-widest text-xs shadow-lg transition-all">Sync Strategic Asset</button>
+                    <div id="sync-status-msg"></div>
                     <button id="delete-btn" onclick="deleteContact()">DELETE</button>
                 </div>
             </div>
@@ -307,9 +326,10 @@
 
     <script>
         // --- GAS Sync Config ---
+        // 連携されない原因特定のため、URLが正しいか今一度ご確認ください
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyOfZxuD23vDllpSnG8f0tgz1qGxbqZinX9NK6qRntu3FDH7rCxNkFpqWdmsz6tvvmk/exec"; 
 
-        // --- Core Strategic Data (Synced with 506.png) ---
+        // --- Core Strategic Data (Based on 506.png) ---
         const DEFAULT_DATA = [
             { id: 'c1', name: 'HBA', category: 'Partner', potential: 3, lastContact: '2026-02-24', memo: 'Partner案件検証。', moons: [{name: '伊藤s'}, {name: '橋本J'}] },
             { id: 'c2', name: 'HBA', category: 'FOCUS', potential: 3, lastContact: '2026-02-24', memo: '重点顧客。', moons: [{name: '高橋取締役'}] },
@@ -335,7 +355,7 @@
             { id: 'c22', name: 'RITS', category: 'Customer', potential: 1, lastContact: '2026-01-29', memo: '新規開拓。', moons: [{name: '上芝s'}] }
         ];
 
-        const STORAGE_KEY = 'ro_v2026_matrix_final_v12_clear';
+        const STORAGE_KEY = 'ro_v2026_matrix_final_v13_debug';
 
         let contacts = (() => {
             try {
@@ -361,9 +381,24 @@
             try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
         }
 
+        // --- 同期ロジック（デバッグ機能付き） ---
         async function saveToGAS(data) {
-            if (!GAS_URL) return;
+            const statusEl = document.getElementById('sync-status-msg');
+            const syncBtn = document.getElementById('sync-btn');
+            
+            if (!GAS_URL) {
+                statusEl.innerText = "ERROR: GAS URL NOT SET";
+                statusEl.style.color = "#ef4444";
+                return;
+            }
+
+            statusEl.innerText = "SENDING TO CLOUD...";
+            statusEl.style.color = "#fbbf24";
+            syncBtn.disabled = true;
+            syncBtn.style.opacity = "0.5";
+
             try {
+                // no-corsモードではレスポンス内容を読み取れないため、成否の判定はfetchが成功したかどうかで行います
                 await fetch(GAS_URL, {
                     method: 'POST',
                     mode: 'no-cors',
@@ -375,8 +410,23 @@
                         timestamp: new Date().toISOString()
                     })
                 });
+                
+                statusEl.innerText = "SYNC COMPLETE";
+                statusEl.style.color = "#10b981";
+                
+                // 3秒後にメッセージを消去
+                setTimeout(() => { 
+                    statusEl.innerText = "";
+                    syncBtn.disabled = false;
+                    syncBtn.style.opacity = "1";
+                }, 3000);
+
             } catch (e) {
                 console.warn("GAS Sync Failure:", e);
+                statusEl.innerText = "NETWORK ERROR (CHECK URL/PERMISSION)";
+                statusEl.style.color = "#ef4444";
+                syncBtn.disabled = false;
+                syncBtn.style.opacity = "1";
             }
         }
 
@@ -384,7 +434,9 @@
             try { 
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts)); 
                 saveToGAS(contacts); 
-            } catch (e) {}
+            } catch (e) {
+                console.error("Storage Error:", e);
+            }
         }
 
         function getEmerald(date) {
@@ -492,6 +544,7 @@
             document.getElementById('edit-last-date').value = c.lastContact;
             document.getElementById('edit-memo').value = c.memo || '';
             document.getElementById('delete-btn').style.display = 'block';
+            document.getElementById('sync-status-msg').innerText = ""; // メッセージクリア
             tempMoons = JSON.parse(JSON.stringify(c.moons || []));
             renderMoons();
             const panel = document.getElementById('side-panel');
@@ -510,6 +563,7 @@
             document.getElementById('edit-last-date').value = new Date().toISOString().split('T')[0];
             document.getElementById('edit-memo').value = '';
             document.getElementById('delete-btn').style.display = 'none';
+            document.getElementById('sync-status-msg').innerText = "";
             tempMoons = [];
             renderMoons();
             const panel = document.getElementById('side-panel');
