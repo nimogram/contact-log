@@ -326,7 +326,7 @@
 
     <script>
         // --- GAS Sync Config ---
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwECHFY1_NXbtfRKi36hcPgtt8uQKHjnxCJ3gjRDHli6U1csf6ogTtAWFtrrHQxCfxC/exec"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzkNA29J0ytwbrH6EgOy-yV9v0yYRhCVccOFnj3Xo5mTtKDXOJrlKyO2WuxUWa6uaN8/exec"; 
 
         const DEFAULT_DATA = [
             { id: 'c1', name: 'HBA', category: 'Partner', potential: 3, lastContact: '2026-02-24', memo: 'Partner案件検証。', moons: [{name: '伊藤s'}, {name: '橋本J'}] },
@@ -373,11 +373,6 @@
             if(fetchBtn) fetchBtn.classList.add('animate-spin');
 
             try {
-                // no-corsではPOSTで送信し、レスポンスを取得できない制限があるため、
-                // 今回は「最新情報を送って」というリクエストを投げてから、レスポンスを受け取る形を
-                // 一般的なCORS対応fetchで行います。（GAS側でJSONPまたは適正なヘッダー設定が必要）
-                // ※制限回避のため、POST + action: 'get' を使用します。
-                
                 const response = await fetch(GAS_URL + "?action=get"); 
                 const cloudData = await response.json();
                 
@@ -388,7 +383,7 @@
                     console.log("Cloud data synchronized.");
                 }
             } catch (e) {
-                console.warn("GAS Fetch Failure (Expected if not set up for GET):", e);
+                console.warn("GAS Fetch Failure:", e);
             } finally {
                 if(fetchBtn) fetchBtn.classList.remove('animate-spin');
             }
