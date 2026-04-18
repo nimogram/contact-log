@@ -34,7 +34,6 @@
             flex-direction: column;
         }
 
-        /* ヘッダー：背景透過ブラー */
         header {
             background-color: rgba(0, 0, 0, 0.85);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -42,7 +41,6 @@
             backdrop-filter: blur(8px);
         }
 
-        /* 四象限レイアウト：画面全体を4等分 */
         #matrix-container {
             flex: 1;
             display: grid;
@@ -76,7 +74,6 @@
             pointer-events: none;
         }
 
-        /* 均等タイル：会社名と担当者を配置 */
         .planet {
             position: relative;
             width: 100%;
@@ -98,21 +95,19 @@
             box-shadow: inset 0 0 25px rgba(16, 185, 129, 0.15), inset 0 0 0 1px rgba(16, 185, 129, 0.25);
         }
 
-        /* PARTNER：紫グラデーション */
         .planet-partner {
             background: linear-gradient(135deg, #6b21a8, #3b0764) !important;
             box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.2), inset 0 0 0 0.5px rgba(255,255,255,0.15) !important;
         }
 
-        /* 統合編集センター：超高透明度センターパネル */
         #side-panel {
             display: none; 
             position: fixed;
             inset: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.35); /* 透明度：高い */
-            backdrop-filter: blur(6px); /* ぼかし：薄い */
+            background: rgba(0, 0, 0, 0.35); 
+            backdrop-filter: blur(6px); 
             -webkit-backdrop-filter: blur(6px);
             z-index: 999999; 
             align-items: center;
@@ -129,7 +124,7 @@
         }
 
         .panel-content {
-            background: rgba(20, 20, 20, 0.45); /* パネル自体の透明度：高い */
+            background: rgba(20, 20, 20, 0.45); 
             width: 100%;
             max-width: 420px;
             border-radius: 28px;
@@ -172,7 +167,6 @@
             border-color: white !important;
         }
 
-        /* 輝くFABボタン */
         #fab-add {
             position: fixed;
             bottom: 25px;
@@ -185,7 +179,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            /* 攻めのグロウ */
             box-shadow: 0 0 25px rgba(16, 185, 129, 0.7), 0 0 50px rgba(16, 185, 129, 0.4), 0 10px 40px rgba(0,0,0,0.8);
             border: 2px solid rgba(255, 255, 255, 0.3);
             cursor: pointer;
@@ -194,7 +187,6 @@
         }
         #fab-add:active { transform: scale(0.9) rotate(90deg); filter: brightness(1.6); }
 
-        /* 削除ボタン：DELETE表記 */
         #delete-btn {
             background-color: #ef4444;
             color: white;
@@ -253,7 +245,6 @@
         <i data-lucide="plus" class="w-10 h-10 text-white pointer-events-none"></i>
     </button>
 
-    <!-- 統合戦術センター -->
     <div id="side-panel" onclick="if(event.target === this) closePanel()">
         <div class="panel-content" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-4">
@@ -315,12 +306,11 @@
     </div>
 
     <script>
-        // --- GAS Sync Config (GASのデプロイURLをここに貼ってください) ---
+        // --- GAS Sync Config ---
         const GAS_URL = "https://script.google.com/macros/s/AKfycbyOfZxuD23vDllpSnG8f0tgz1qGxbqZinX9NK6qRntu3FDH7rCxNkFpqWdmsz6tvvmk/exec"; 
 
-        // --- Core Strategic Data (Based on 506.png) ---
+        // --- Core Strategic Data (Synced with 506.png) ---
         const DEFAULT_DATA = [
-            // Potentials map: 4/5 -> 4, 3 -> 3, 2 -> 2, 1 -> 1
             { id: 'c1', name: 'HBA', category: 'Partner', potential: 3, lastContact: '2026-02-24', memo: 'Partner案件検証。', moons: [{name: '伊藤s'}, {name: '橋本J'}] },
             { id: 'c2', name: 'HBA', category: 'FOCUS', potential: 3, lastContact: '2026-02-24', memo: '重点顧客。', moons: [{name: '高橋取締役'}] },
             { id: 'c3', name: 'JSD', category: 'FOCUS', potential: 3, lastContact: '2026-02-24', memo: '戦術的アプローチ。', moons: [{name: '柴田s'}, {name: '駒子s'}] },
@@ -371,7 +361,6 @@
             try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
         }
 
-        // GASへの送信
         async function saveToGAS(data) {
             if (!GAS_URL) return;
             try {
