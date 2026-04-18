@@ -8,11 +8,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/umd/lucide.min.js"></script>
     <style>
         :root {
-            --em-fresh: #064e3b;
-            --em-30:    #059669;
-            --em-60:    #10b981;
-            --em-180:   #34d399;
-            --em-bright:#6ee7b7;
+            /* 緑（Customer系）ヒートマップ */
+            --heat-active:  #10b981; 
+            --heat-recent:  #059669; 
+            --heat-caution: #065f46; 
+            --heat-stale:   #022c22; 
+            --heat-dormant: #1e293b; 
+
+            /* 紫（Partner系）ヒートマップ：視認性を高めるため色相を段階的に設定 */
+            --p-heat-active:  #d8b4fe; /* 0-30D: 非常に明るい紫 */
+            --p-heat-recent:  #a855f7; /* 30-60D: 標準的な紫 */
+            --p-heat-caution: #7e22ce; /* 60-180D: 深い紫 */
+            --p-heat-stale:   #581c87; /* 180-365D: 暗い紫 */
+            --p-heat-dormant: #2e1065; /* 365D+: 最暗部 */
+            
             --bg-dark: #000000;
         }
 
@@ -84,20 +93,20 @@
             justify-content: center;
             cursor: pointer;
             box-shadow: inset 0 0 0 0.5px rgba(255,255,255,0.08);
-            transition: filter 0.2s, background-color 0.3s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
             padding: 2px;
         }
 
-        .planet:active { filter: brightness(1.6); }
+        .planet:active { filter: brightness(1.6); transform: scale(0.98); }
 
         .planet-glow {
-            box-shadow: inset 0 0 25px rgba(16, 185, 129, 0.15), inset 0 0 0 1px rgba(16, 185, 129, 0.25);
+            box-shadow: inset 0 0 30px rgba(16, 185, 129, 0.3), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
         }
 
+        /* Partnerは個別クラスではなく、背景色計算で対応するように変更 */
         .planet-partner {
-            background: linear-gradient(135deg, #6b21a8, #3b0764) !important;
-            box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.2), inset 0 0 0 0.5px rgba(255,255,255,0.15) !important;
+            box-shadow: inset 0 0 15px rgba(168, 85, 247, 0.4), inset 0 0 0 0.5px rgba(255,255,255,0.2) !important;
         }
 
         #side-panel {
@@ -155,7 +164,7 @@
             text-align: center;
         }
         
-        .filter-btn.active { background-color: #444 !important; color: white !important; }
+        .filter-btn.active { background-color: #ffffff !important; color: #000000 !important; border-color: #fff !important; }
 
         #fab-add {
             position: fixed;
@@ -243,7 +252,6 @@
                     <input type="text" id="edit-name" class="w-full bg-transparent border-b border-white/10 p-0 py-1 text-base font-black text-white outline-none">
                 </div>
 
-                <!-- StakeholdersをCompany Nameの下に配置 -->
                 <div class="pt-2 border-t border-white/5">
                     <div class="flex justify-between items-center mb-2">
                         <label class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Stakeholders</label>
@@ -272,13 +280,19 @@
                         </select>
                     </div>
                 </div>
+                
                 <div>
-                    <label class="text-[9px] text-gray-500 uppercase font-black mb-1 block tracking-widest">Last Contact Date</label>
+                    <!-- 修正：TODAYを押しやすい「物理ボタン」デザインに変更 -->
+                    <div class="flex justify-between items-end mb-2">
+                        <label class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Last Contact Date</label>
+                        <button onclick="setTodayDate()" class="bg-emerald-500/20 border border-emerald-500/50 px-3 py-1 rounded-full text-emerald-400 text-[10px] font-black active:scale-95 transition-all">TODAY</button>
+                    </div>
                     <input type="date" id="edit-last-date" class="w-full bg-white/10 border border-white/10 rounded-lg p-2 text-white text-xs outline-none">
                 </div>
+                
                 <div>
                     <label class="text-[9px] text-gray-500 uppercase font-black mb-1 block tracking-widest">Intel Log (Repo)</label>
-                    <textarea id="edit-memo" rows="3" class="w-full bg-white/10 border border-white/10 rounded-lg p-2 text-xs text-gray-300 outline-none"></textarea>
+                    <textarea id="edit-memo" rows="3" class="w-full bg-white/10 border border-white/10 rounded-lg p-2 text-xs text-gray-300 outline-none leading-relaxed"></textarea>
                 </div>
                 
                 <div class="flex flex-col gap-1 pt-2">
@@ -311,7 +325,6 @@
             }
             fetchFromGAS();
             
-            // 事件委譲（どのマスを叩いても確実に開くように）
             document.getElementById('matrix-container').addEventListener('click', (e) => {
                 const planet = e.target.closest('.planet');
                 if (planet && planet.dataset.id) {
@@ -320,66 +333,39 @@
             });
         }
 
-        // クラウドから同期
         async function fetchFromGAS() {
             if (!GAS_URL) return;
             const fetchBtn = document.getElementById('global-fetch-btn');
             const statusEl = document.getElementById('sync-status-msg');
-            
             if(fetchBtn) fetchBtn.classList.add('animate-spin');
-            if(statusEl) {
-                statusEl.innerText = "COMMAND: REFRESHING FROM CLOUD...";
-                statusEl.style.color = "#fbbf24";
-            }
-
             try {
                 const response = await fetch(GAS_URL + "?action=get"); 
-                if (!response.ok) throw new Error("Network response error");
-                
                 const cloudData = await response.json();
                 if (cloudData && cloudData.status === 'success' && cloudData.payload) {
                     contacts = cloudData.payload;
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
                     render();
-                    if(statusEl) {
-                        statusEl.innerText = "COMMAND: CLOUD SYNC COMPLETE";
-                        statusEl.style.color = "#10b981";
-                        setTimeout(() => statusEl.innerText = "", 3000);
-                    }
                 }
             } catch (e) {
-                if(statusEl) {
-                    statusEl.innerText = "COMMAND: SYNC FAILED\nCHECK GAS ACCESS (ANYONE)";
-                    statusEl.style.color = "#ef4444";
-                }
+                if(statusEl) { statusEl.innerText = "COMMAND: SYNC ERROR"; statusEl.style.color = "#ef4444"; }
             } finally {
                 if(fetchBtn) fetchBtn.classList.remove('animate-spin');
             }
         }
 
-        // クラウドへ送信
         async function saveToGAS(data) {
             const statusEl = document.getElementById('sync-status-msg');
             if (!GAS_URL || !statusEl) return;
-
-            statusEl.innerText = "COMMAND: UPLOADING...";
-            statusEl.style.color = "#fbbf24";
-
+            statusEl.innerText = "COMMAND: UPLOADING..."; statusEl.style.color = "#fbbf24";
             try {
                 await fetch(GAS_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    cache: 'no-cache',
+                    method: 'POST', mode: 'no-cors', cache: 'no-cache',
                     headers: { 'Content-Type': 'text/plain' },
                     body: JSON.stringify({ action: 'sync', payload: data, timestamp: new Date().toISOString() })
                 });
-                statusEl.innerText = "COMMAND: SYNC REQUEST SENT";
-                statusEl.style.color = "#10b981";
+                statusEl.innerText = "COMMAND: SYNC SUCCESSFUL"; statusEl.style.color = "#10b981";
                 setTimeout(() => statusEl.innerText = "", 3000);
-            } catch (e) {
-                statusEl.innerText = "COMMAND: UPLOAD ERROR";
-                statusEl.style.color = "#ef4444";
-            }
+            } catch (e) { statusEl.innerText = "COMMAND: UPLOAD ERROR"; statusEl.style.color = "#ef4444"; }
         }
 
         function render() {
@@ -410,16 +396,30 @@
                 
                 items.forEach(c => {
                     const div = document.createElement('div');
+                    const diff = (new Date() - new Date(c.lastContact)) / 86400000;
+                    
                     div.className = `planet ${c.category === 'FOCUS' ? 'planet-glow' : ''} ${c.category === 'Partner' ? 'planet-partner' : ''}`;
-                    if (c.category !== 'Partner') div.style.backgroundColor = getEmerald(c.lastContact);
+                    
+                    // カテゴリに合わせてヒートマップ色を取得
+                    div.style.backgroundColor = (c.category === 'Partner') ? getPartnerColor(diff) : getEmeraldColor(diff);
                     
                     div.dataset.id = String(c.id);
-                    const textColor = (c.category === 'Partner' || (new Date() - new Date(c.lastContact))/86400000 < 180) ? '#fff' : '#000';
+                    
+                    // 視認性のための動的テキストカラー設定
+                    let textColor = '#fff';
+                    if (c.category === 'Partner') {
+                        // 紫ヒートマップのActive時は黒文字
+                        if (diff < 30) textColor = '#000';
+                    } else {
+                        // 緑ヒートマップのActive時は黒文字
+                        if (diff < 30) textColor = '#000';
+                    }
+                    
                     const moonList = (c.moons || []).map(m => m.name).join(' / ');
                     
                     div.innerHTML = `
                         <div class="text-[10px] font-black text-center px-1 uppercase leading-none pointer-events-none mb-0.5" style="color: ${textColor}">${c.name}</div>
-                        <div class="text-[7.5px] font-medium text-center px-1 opacity-70 leading-none pointer-events-none" style="color: ${textColor}">${moonList}</div>
+                        <div class="text-[7.5px] font-medium text-center px-1 opacity-80 leading-none pointer-events-none" style="color: ${textColor}">${moonList}</div>
                     `;
                     container.appendChild(div);
                 });
@@ -427,15 +427,25 @@
             safeLucide();
         }
 
-        function getEmerald(date) {
-            const palette = { 0: '#064e3b', 30: '#059669', 60: '#10b981', 180: '#34d399', 365: '#6ee7b7' };
-            if(!date) return palette[0];
-            const diff = (new Date() - new Date(date)) / 86400000;
-            if (diff >= 365) return palette[365];
-            if (diff >= 180) return palette[180];
-            if (diff >= 60) return palette[60];
-            if (diff >= 30) return palette[30];
-            return palette[0];
+        function getEmeraldColor(diff) {
+            if (diff < 30)  return '#10b981'; // Active
+            if (diff < 60)  return '#059669'; // Recent
+            if (diff < 180) return '#065f46'; // Caution
+            if (diff < 365) return '#022c22'; // Stale
+            return '#1e293b'; // Dormant
+        }
+
+        // 修正：紫（Partner）の鮮度グラデーションをより鮮明に
+        function getPartnerColor(diff) {
+            if (diff < 30)  return '#d8b4fe'; // Active: 非常に明るい紫
+            if (diff < 60)  return '#a855f7'; // Recent: 中間
+            if (diff < 180) return '#7e22ce'; // Caution: 深い
+            if (diff < 365) return '#581c87'; // Stale: 暗い
+            return '#2e1065'; // Dormant: 最暗
+        }
+
+        function setTodayDate() {
+            document.getElementById('edit-last-date').value = new Date().toISOString().split('T')[0];
         }
 
         function openPanel(id) {
