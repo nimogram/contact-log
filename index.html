@@ -202,7 +202,6 @@
         }
         #delete-btn:active { background-color: #b91c1c; transform: scale(0.96); }
 
-        /* 同期ステータス */
         #sync-status-msg {
             font-size: 8px;
             font-weight: 900;
@@ -229,7 +228,6 @@
                        oninput="handleSearch(this.value)"
                        class="w-full bg-white/5 border border-white/10 rounded-full pl-10 pr-4 py-2 text-[12px] focus:border-emerald-500/50 outline-none">
             </div>
-            <!-- クラウド同期ボタンを追加 -->
             <button onclick="fetchFromGAS()" id="global-fetch-btn" class="p-2 bg-white/5 rounded-full text-emerald-400 hover:bg-white/10" title="Cloud Refresh">
                 <i data-lucide="cloud-download" class="w-5 h-5"></i>
             </button>
@@ -325,7 +323,6 @@
     </div>
 
     <script>
-        // --- GAS Sync Config ---
         const GAS_URL = "https://script.google.com/macros/s/AKfycbzkNA29J0ytwbrH6EgOy-yV9v0yYRhCVccOFnj3Xo5mTtKDXOJrlKyO2WuxUWa6uaN8/exec"; 
 
         const DEFAULT_DATA = [
@@ -333,10 +330,27 @@
             { id: 'c2', name: 'HBA', category: 'FOCUS', potential: 3, lastContact: '2026-02-24', memo: '重点顧客。', moons: [{name: '高橋取締役'}] },
             { id: 'c3', name: 'JSD', category: 'FOCUS', potential: 3, lastContact: '2026-02-24', memo: '戦術的アプローチ。', moons: [{name: '柴田s'}, {name: '駒子s'}] },
             { id: 'c4', name: 'NTTD', category: 'Partner', potential: 3, lastContact: '2026-02-10', memo: '広域連携。', moons: [{name: '庄子s'}, {name: '鈴木K'}, {name: '中野谷s'}, {name: '澤野K'}] },
-            { id: 'c13', name: '札幌市', category: 'FOCUS', potential: 4, lastContact: '2025-12-12', memo: '政令指定都市。', moons: [{name: '坪谷s'}] }
+            { id: 'c5', name: 'OTS', category: 'Partner', potential: 3, lastContact: '2026-02-09', memo: 'チャネル。', moons: [{name: '田邊s'}] },
+            { id: 'c6', name: 'PFU', category: 'Partner', potential: 3, lastContact: '2026-02-04', memo: 'ソリューション。', moons: [{name: '谷口K'}] },
+            { id: 'c7', name: 'アインHD', category: 'FOCUS', potential: 3, lastContact: '2025-06-26', memo: 'GreenLake提案。', moons: [{name: '滝原s'}] },
+            { id: 'c8', name: 'ホクレン', category: 'Customer', potential: 3, lastContact: '2025-12-26', memo: '既存。', moons: [{name: '高橋K'}] },
+            { id: 'c9', name: '北海道ガス', category: 'FOCUS', potential: 3, lastContact: '2025-09-05', memo: 'DX推進。', moons: [{name: '西村B'}] },
+            { id: 'c10', name: '北海道警察', category: 'FOCUS', potential: 3, lastContact: '2026-02-04', memo: '治安基盤。', moons: [{name: '石亀s'}] },
+            { id: 'c11', name: '北海道庁', category: 'FOCUS', potential: 3, lastContact: '2026-02-04', memo: '公共インフラ。', moons: [{name: '山中s'}] },
+            { id: 'c12', name: 'HARP', category: 'FOCUS', potential: 4, lastContact: '2026-02-05', memo: '重点行政SaaS。', moons: [{name: '川上s'}] },
+            { id: 'c13', name: '札幌市', category: 'FOCUS', potential: 4, lastContact: '2025-12-12', memo: '政令指定都市。', moons: [{name: '坪谷s'}] },
+            { id: 'c14', name: 'ツルハHD', category: 'FOCUS', potential: 4, lastContact: '2026-02-18', memo: 'リテールDX。', moons: [{name: '川添s'}] },
+            { id: 'c15', name: 'JRH', category: 'FOCUS', potential: 4, lastContact: '2025-12-26', memo: '交通基盤。', moons: [{name: '福士B'}] },
+            { id: 'c16', name: 'SEC', category: 'FOCUS', potential: 4, lastContact: '2025-11-13', memo: '情報システム。', moons: [{name: '藤内s'}] },
+            { id: 'c17', name: 'サツドラ', category: 'FOCUS', potential: 3, lastContact: '2025-11-11', memo: '地域経済。', moons: [{name: '佐々木CIO'}] },
+            { id: 'c18', name: '北大', category: 'FOCUS', potential: 3, lastContact: '2026-02-06', memo: '研究機関。', moons: [{name: '財原s'}] },
+            { id: 'c19', name: 'ニトリ', category: 'Customer', potential: 2, lastContact: '2026-01-16', memo: 'グローバルSCM。', moons: [{name: '舘岡s'}, {name: '中谷s'}] },
+            { id: 'c20', name: 'RJ', category: 'Customer', potential: 2, lastContact: '2025-12-26', memo: '顧客。', moons: [{name: '三島s'}] },
+            { id: 'c21', name: '北星学園大学', category: 'Customer', potential: 3, lastContact: '2026-02-17', memo: '学術。', moons: [{name: '岩本K'}] },
+            { id: 'c22', name: 'RITS', category: 'Customer', potential: 1, lastContact: '2026-01-29', memo: '新規開拓。', moons: [{name: '上芝s'}] }
         ];
 
-        const STORAGE_KEY = 'ro_v2026_matrix_final_v15_bidir';
+        const STORAGE_KEY = 'ro_v2026_matrix_final_v17_fixed_link';
 
         let contacts = (() => {
             try {
@@ -356,7 +370,6 @@
         function init() {
             safeLucide();
             render();
-            // 起動時にクラウドからデータを取得
             fetchFromGAS();
         }
 
@@ -364,9 +377,6 @@
             try { if (typeof lucide !== 'undefined') lucide.createIcons(); } catch (e) {}
         }
 
-        // --- 双方向同期ロジック ---
-
-        // 1. クラウドからデータを取得 (Fetch)
         async function fetchFromGAS() {
             if (!GAS_URL) return;
             const fetchBtn = document.getElementById('global-fetch-btn');
@@ -380,7 +390,6 @@
                     contacts = cloudData.payload;
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
                     render();
-                    console.log("Cloud data synchronized.");
                 }
             } catch (e) {
                 console.warn("GAS Fetch Failure:", e);
@@ -389,21 +398,14 @@
             }
         }
 
-        // 2. クラウドへデータを送信 (Sync)
         async function saveToGAS(data) {
             const statusEl = document.getElementById('sync-status-msg');
             const syncBtn = document.getElementById('sync-btn');
-            
-            if (!GAS_URL) {
-                if(statusEl) statusEl.innerText = "CRITICAL: GAS URL MISSING";
-                return;
-            }
-
+            if (!GAS_URL) return;
             if(statusEl) {
                 statusEl.innerText = "UPLOADING TO CLOUD...";
                 statusEl.style.color = "#fbbf24";
             }
-
             try {
                 await fetch(GAS_URL, {
                     method: 'POST',
@@ -416,7 +418,6 @@
                         timestamp: new Date().toISOString()
                     })
                 });
-                
                 if(statusEl) {
                     statusEl.innerText = "CLOUD SYNC SUCCESSFUL";
                     statusEl.style.color = "#10b981";
@@ -424,7 +425,7 @@
                 }
             } catch (e) {
                 if(statusEl) {
-                    statusEl.innerText = "SYNC ERROR: " + e.message.toUpperCase();
+                    statusEl.innerText = "SYNC ERROR";
                     statusEl.style.color = "#ef4444";
                 }
             }
@@ -461,6 +462,12 @@
             });
             
             let list = [...contacts];
+            
+            // 検索・フィルタリングの適用
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            if (searchVal) {
+                list = list.filter(c => c.name.toLowerCase().includes(searchVal));
+            }
             if (activeFilterDays > 0) {
                 const now = new Date();
                 list = list.filter(c => ((now - new Date(c.lastContact)) / 86400000) >= activeFilterDays);
@@ -494,7 +501,8 @@
                         div.style.backgroundColor = getEmerald(c.lastContact);
                     }
                     
-                    div.setAttribute('onclick', `openPanel('${c.id}')`);
+                    // 修正の核心：イベントリスナーを個別にバインドし、IDをクロージャで保持
+                    div.addEventListener('click', () => openPanel(c.id));
                     
                     const diff = (new Date() - new Date(c.lastContact)) / 86400000;
                     const textColor = (c.category === 'Partner' || diff < 180) ? '#fff' : '#000';
@@ -524,17 +532,17 @@
         }
 
         function handleSearch(val) {
-            const term = val.toLowerCase();
-            if (!term) return;
-            const found = contacts.find(c => c.name.toLowerCase().includes(term));
-            if (found) openPanel(found.id);
+            render(); // 検索入力のたびに再描画
         }
 
         function openPanel(id) {
+            // 文字列・数値のゆらぎを吸収して検索
             const c = contacts.find(x => String(x.id) === String(id));
             if (!c) return;
+            
             isAddingNew = false;
             currentId = String(id);
+            
             document.getElementById('panel-title').innerText = 'Strategic Intel';
             document.getElementById('edit-name').value = c.name;
             document.getElementById('edit-potential').value = c.potential;
@@ -542,9 +550,10 @@
             document.getElementById('edit-last-date').value = c.lastContact;
             document.getElementById('edit-memo').value = c.memo || '';
             document.getElementById('delete-btn').style.display = 'block';
-            if(document.getElementById('sync-status-msg')) document.getElementById('sync-status-msg').innerText = "";
+            
             tempMoons = JSON.parse(JSON.stringify(c.moons || []));
             renderMoons();
+            
             const panel = document.getElementById('side-panel');
             panel.style.display = 'flex';
             setTimeout(() => panel.classList.add('open'), 10);
@@ -561,7 +570,6 @@
             document.getElementById('edit-last-date').value = new Date().toISOString().split('T')[0];
             document.getElementById('edit-memo').value = '';
             document.getElementById('delete-btn').style.display = 'none';
-            if(document.getElementById('sync-status-msg')) document.getElementById('sync-status-msg').innerText = "";
             tempMoons = [];
             renderMoons();
             const panel = document.getElementById('side-panel');
@@ -572,7 +580,7 @@
 
         function confirmSync() {
             const name = document.getElementById('edit-name').value;
-            if(!name) { alert("会社名を入力してください。"); return; }
+            if(!name) return;
             const data = {
                 id: currentId,
                 name: name,
