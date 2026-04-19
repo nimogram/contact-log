@@ -121,8 +121,8 @@
         }
 
         .panel-content {
-            /* 背景色の透明度を0.7に調整し、カテゴリ色をはっきりさせる */
-            background: rgba(20, 20, 20, 0.7); 
+            /* 背景色の基本設定（syncPanelColorで上書きされます） */
+            background: rgba(20, 20, 20, 0.55); 
             width: 100%;
             max-width: 420px;
             border-radius: 28px;
@@ -422,23 +422,24 @@
             return '#1e293b'; 
         }
 
+        // 修正：透明度を上げ（アルファ値を下げ）、かつベースカラーをより濃く飽和させた色に変更
         function syncPanelColor(cat) {
             const panel = document.getElementById('panel-box');
             const syncBtn = document.getElementById('sync-btn');
-            let bgColor = 'rgba(20, 20, 20, 0.7)';
+            let bgColor = 'rgba(20, 20, 20, 0.5)';
             let btnGradient = 'linear-gradient(135deg, #10b981, #059669)';
 
             if (cat === 'FOCUS') {
-                bgColor = 'rgba(234, 179, 8, 0.7)';
+                bgColor = 'rgba(161, 98, 7, 0.5)'; // 濃いアンバー
                 btnGradient = 'linear-gradient(135deg, #fde047, #ca8a04)';
             } else if (cat === 'Partner') {
-                bgColor = 'rgba(168, 85, 247, 0.7)';
+                bgColor = 'rgba(88, 28, 135, 0.5)'; // 濃いパープル
                 btnGradient = 'linear-gradient(135deg, #d8b4fe, #7e22ce)';
             } else if (cat === 'Vendor') {
-                bgColor = 'rgba(30, 58, 138, 0.8)';
+                bgColor = 'rgba(23, 37, 84, 0.6)'; // 深いネイビー
                 btnGradient = 'linear-gradient(135deg, #3b82f6, #1e3a8a)';
             } else if (cat === 'Customer') {
-                bgColor = 'rgba(16, 185, 129, 0.7)';
+                bgColor = 'rgba(2, 44, 34, 0.5)'; // 深いグリーン
                 btnGradient = 'linear-gradient(135deg, #10b981, #059669)';
             }
             panel.style.backgroundColor = bgColor;
